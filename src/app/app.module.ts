@@ -13,6 +13,10 @@ import { RegisterComponent } from './login/register.component';
 import { LoginComponent } from './login/login.component';
 
 
+// temporales, se van a rehubicar más tarde:
+import { FormsModule } from '@angular/forms';
+
+
 
 @NgModule({
   declarations: [
@@ -23,7 +27,8 @@ import { LoginComponent } from './login/login.component';
   imports: [
     BrowserModule,
     APP_ROUTES,
-    PagesModule
+    PagesModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
