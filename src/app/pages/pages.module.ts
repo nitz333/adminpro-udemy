@@ -19,6 +19,7 @@ import { PagesComponent } from './pages.component';
 // Temporales, se rehubicarán más adelante...
 import { IncrementadorComponent } from '../components/incrementador/incrementador.component';
 import { GraficoDonaComponent } from '../components/grafico-dona/grafico-dona.component';
+import { AccountSettingsComponent } from './account-settings/account-settings.component';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import { GraficoDonaComponent } from '../components/grafico-dona/grafico-dona.co
         ProgressComponent,
         Graficas1Component,
         IncrementadorComponent,
-        GraficoDonaComponent
+        GraficoDonaComponent,
+        AccountSettingsComponent
     ],
     exports: [
         //PagesComponent, // Este componente es para este mismo módulo, se exporta explícitamente hasta abajo como definición de clase.

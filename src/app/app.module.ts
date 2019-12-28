@@ -7,11 +7,13 @@ import { APP_ROUTES } from './app.routes';
 // Mis módulos
 import { PagesModule } from './pages/pages.module';
 
+// Mis servicios
+import { ServicesModule } from './services/services.module';
+
 // Mis componentes
 import { AppComponent } from './app.component';
 import { RegisterComponent } from './login/register.component';
 import { LoginComponent } from './login/login.component';
-
 
 // temporales, se van a rehubicar más tarde:
 import { FormsModule } from '@angular/forms';
@@ -28,7 +30,8 @@ import { FormsModule } from '@angular/forms';
     BrowserModule,
     APP_ROUTES,
     PagesModule,
-    FormsModule
+    FormsModule,
+    ServicesModule
   ],
   providers: [],
   bootstrap: [AppComponent]

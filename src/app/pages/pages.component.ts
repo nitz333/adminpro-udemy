@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { SettingsService } from '../services/services.index';
+
+// Esta función es con la que envolvimos el script assets/js/custom.js (ver video 64)
+declare function init_plugins();
 
 @Component({
   selector: 'app-pages',
@@ -7,9 +11,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class PagesComponent implements OnInit {
 
-  constructor() { }
+  constructor( private _settingsService: SettingsService ) { }
 
-  ngOnInit() {
+  ngOnInit()
+  {
+    init_plugins();
   }
 
 }
