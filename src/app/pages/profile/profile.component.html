@@ -1,0 +1,64 @@
+<!-- Row [Tomado de: form-layout.html] -->
+<div class="row animated fadeIn">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Información personal</h4>
+                <h6 class="card-subtitle">No olvides guardar los cambios</h6>
+
+                <form ngNativeValidate [formGroup]="forma" (ngSubmit)="guardar()" class="form p-t-20">
+                    <div class="form-group">
+                        <label for="exampleInputuname">Nombre</label>
+                        <div class="input-group">
+                            <div class="input-group-addon"><i class="ti-user"></i></div>
+                            <input type="text" formControlName="nombre" name="nombre" required class="form-control" placeholder="Nombre">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputuname">Apellido paterno</label>
+                        <div class="input-group">
+                            <div class="input-group-addon"><i class="ti-user"></i></div>
+                            <input type="text" formControlName="primer_apellido" name="primer_apellido" required class="form-control" placeholder="Primer apellido">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputuname">Apellido materno</label>
+                        <div class="input-group">
+                            <div class="input-group-addon"><i class="ti-user"></i></div>
+                            <input type="text" formControlName="segundo_apellido" name="segundo_apellido" class="form-control" placeholder="Segundo apellido">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">E-mail</label>
+                        <div class="input-group">
+                            <div class="input-group-addon"><i class="ti-email"></i></div>
+                            <input type="email" formControlName="email" name="email" required class="form-control" placeholder="E-mail">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-block btn-success waves-effect waves-light m-r-10"><i class="fa fa-save"></i> Guardar</button>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-body" align="center">
+                <h4 class="card-title">Fotografía del usuario</h4>
+                <h6 class="card-subtitle">Se guardará tras "Actualizar foto"</h6>
+
+                <img *ngIf="!imagenTmp" [src]="usuario.img | imagen" class="w150">
+                <img *ngIf="imagenTmp" [src]="imagenTmp | imagen" class="w150">
+                <input (change)="seleccionImagen( $event.target.files[0] )" type="file">
+                <br>
+                <br>
+                <button (click)="cambiarImagen()" [disabled]="!imagenASubir" type="button" class="btn btn-block btn-success waves-effect waves-light m-r-10"><i class="fa fa-save"></i> Actualizar foto</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Row -->

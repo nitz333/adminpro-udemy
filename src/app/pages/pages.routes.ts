@@ -1,6 +1,7 @@
 import { Routes, RouterModule } from '@angular/router';
 
 import { PagesComponent } from './pages.component';
+import { ProfileComponent } from './profile/profile.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProgressComponent } from './progress/progress.component';
 import { Graficas1Component } from './graficas1/graficas1.component';
@@ -23,6 +24,7 @@ const routes: Routes = [
           { path: 'promesas', component: PromesasComponent, data: { titulo: 'Promesas' } },
           { path: 'rxjs', component: RxjsComponent, data: { titulo: 'RxJs' } },
           { path: 'account-settings', component: AccountSettingsComponent, data: { titulo: 'Ajustes del tema' } },
+          { path: 'perfil', component: ProfileComponent, data: { titulo: 'Perfil del usuario' } },
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' }, // Cualquier ruta vacía redirecciona al dashboard
         ]
       }

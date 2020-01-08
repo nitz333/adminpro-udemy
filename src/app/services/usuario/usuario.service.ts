@@ -3,8 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Usuario } from 'src/app/models/usuario.model';
 import { URL_BACKEND } from '../../config/config';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertIcon } from 'sweetalert2';
 import { Router } from '@angular/router';
+import { UploadService } from '../upload/upload.service'; // Esta bien de esta ruta y no del services.index.ts por el error cíclico raro.
 
 @Injectable({
   providedIn: 'root'
@@ -16,9 +17,11 @@ export class UsuarioService {
   token: string;
 
   constructor( private _http: HttpClient,
-               private _router: Router )
+               private _router: Router,
+               private _upload: UploadService )
   {
     this._cargarStorage();
+    //console.log(this.usuario);
   }
 
   login( usuario: Usuario, recordar: boolean = false )
@@ -95,6 +98,42 @@ export class UsuarioService {
 
   }
 
+  actualizarUsuario( usuario: Usuario )
+  {
+    let url = URL_BACKEND + '/usuario/' + usuario._id;
+    url += '?token=' + this.token;
+    
+    return this._http.put( url, usuario ).pipe( map( (resp: any) => {
+
+      // Debemos actualizar nuestro local storage para reflejar los cambios de la BD
+      this._guardarStorage( resp.usuario._id, this.token, usuario );
+
+      // Mandamos una notificación de sweetalert2 pero estilo toast      
+      this._toastSwal('Usuario actualizado', 'success');
+
+      return true;
+    }));
+  }
+
+  // El parámetro id es recibido por si se quiere cambiar la imagen de otro usuario
+  cambiarImagen( archivo: File, id: string )
+  {
+    this._upload.subirArchivo( archivo, 'usuarios', id ).then( (resp: any) => {
+      
+      this.usuario.img = resp.usuario.img;
+
+      // Debemos actualizar nuestro local storage para reflejar los cambios de la BD
+      this._guardarStorage( id, this.token, this.usuario );
+
+      // Mandamos una notificación de sweetalert2 pero estilo toast      
+      this._toastSwal('Imagen actualizada', 'success');
+
+    })
+    .catch( resp => {
+      console.log(resp);
+    });
+  }
+
   estaLogueado()
   {
     return ( this.token.length > 0 ) ? true : false;
@@ -124,6 +163,27 @@ export class UsuarioService {
       this.token = '';
       this.usuario = null;
     }
+  }
+
+  private _toastSwal( titulo: string, icono: SweetAlertIcon )
+  {
+    // Mandamos una notificación de sweetalert2 pero estilo toast      
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      onOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    });
+    
+    Toast.fire({
+      icon: icono,
+      title: titulo
+    });
   }
   
 
