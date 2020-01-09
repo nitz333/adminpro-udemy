@@ -16,7 +16,7 @@ export class ImagenPipe implements PipeTransform {
     }
 
     // Para las imagenes en base64 que se usaran para el preview
-    if( img.indexOf('base64') >= 0)
+    if( img !== undefined && img.indexOf('base64') >= 0)
     {
       return img;
     }

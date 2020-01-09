@@ -80,9 +80,16 @@ export class UsuarioService {
     this._router.navigate(['/login']);
   }
 
+  cargarUsuarios( desde: number = 0, limit: number = 10 )
+  {
+    let url = URL_BACKEND + '/usuario?desde=' + desde + '&limit=' + limit;
+
+    return this._http.get( url );
+
+  }
+
   crearUsuario( usuario: Usuario )
   {
-    
     let url = URL_BACKEND + '/usuario';
     
     return this._http.post( url, usuario ).pipe( map( (resp: any) => {
@@ -98,6 +105,13 @@ export class UsuarioService {
 
   }
 
+  buscarUsuarios( termino: string )
+  {
+    let url = URL_BACKEND + '/busqueda/coleccion/usuarios/' + termino;
+
+    return this._http.get( url ).pipe( map( (resp: any) => resp.usuarios ) );
+  }
+
   actualizarUsuario( usuario: Usuario )
   {
     let url = URL_BACKEND + '/usuario/' + usuario._id;
@@ -105,14 +119,25 @@ export class UsuarioService {
     
     return this._http.put( url, usuario ).pipe( map( (resp: any) => {
 
-      // Debemos actualizar nuestro local storage para reflejar los cambios de la BD
-      this._guardarStorage( resp.usuario._id, this.token, usuario );
+      // Actualizamos el local storage en caso de que la actualización del usuario haya sido del mismo
+      if ( usuario._id === this.usuario._id )
+      {
+        // Debemos actualizar nuestro local storage para reflejar los cambios de la BD
+        this._guardarStorage( resp.usuario._id, this.token, usuario );
+      }
 
       // Mandamos una notificación de sweetalert2 pero estilo toast      
       this._toastSwal('Usuario actualizado', 'success');
 
       return true;
     }));
+  }
+
+  eliminarUsuario( id: string )
+  {
+    let url = URL_BACKEND + '/usuario/' + id + '?token=' + this.token;
+
+    return this._http.delete( url ).pipe( map( resp => true ) );
   }
 
   // El parámetro id es recibido por si se quiere cambiar la imagen de otro usuario
