@@ -1,43 +1,39 @@
 import { Component, OnInit } from '@angular/core';
-import { UsuarioService } from 'src/app/services/services.index';
-import { Usuario } from 'src/app/models/usuario.model';
+import { MedicoService } from 'src/app/services/services.index';
+import { Medico } from 'src/app/models/medico.model';
 import Swal from 'sweetalert2';
-import { ModalUploadService } from 'src/app/components/modal-upload/modal-upload.service';
 
 @Component({
-  selector: 'app-usuarios',
-  templateUrl: './usuarios.component.html',
+  selector: 'app-medicos',
+  templateUrl: './medicos.component.html',
   styles: []
 })
-export class UsuariosComponent implements OnInit {
+export class MedicosComponent implements OnInit {
 
-  usuarios: Usuario[] = [];
+  medicos: Medico[] = [];
   desde: number = 0;
   // Nota: A diferencia del video, establecí en el backend un valor limit como parámetro en el get,
   //       este servirá para definir la cantidad de registros por página
-  limit: number = 5;
+  limit: number = 2;
   totalRegistros: number = 0;
   loading: boolean = true;
 
-  constructor( private _usuarioService: UsuarioService,
-               private _modalUploadService: ModalUploadService ) { }
+  constructor( private _medicoService: MedicoService ) { }
 
-  ngOnInit()
-  {
-    this.cargarUsuarios();
-
-    // Para el modal de carga de imagen, vamos a subscribirnos a éste servicio para ser notificados de cambios
-    this._modalUploadService.notificacion.subscribe( resp => this.cargarUsuarios() );
+  ngOnInit() {
+    this.cargarMedicos();
   }
 
-  cargarUsuarios()
+  cargarMedicos()
   {
     this.loading = true;
 
-    this._usuarioService.cargarUsuarios( this.desde, this.limit ).subscribe( (resp: any) => {
-      this.usuarios = resp.usuarios;
+    this._medicoService.cargarMedicos( this.desde, this.limit ).subscribe( (resp: any) => {
+
+      this.medicos = resp.medicos;
       this.totalRegistros = resp.total;
       this.loading = false;
+
     });
   }
 
@@ -68,46 +64,31 @@ export class UsuariosComponent implements OnInit {
     else
     {
       this.desde += limit;
-      this.cargarUsuarios();
+      this.cargarMedicos();
     }
 
   }
 
-  buscarUsuario( termino: string )
+  buscarMedico( termino: string )
   {
     // Validamos que el termino no sea vacío
     if ( termino.length <= 0 )
     {
-      this.cargarUsuarios();
+      this.cargarMedicos();
       return;
     }
 
     this.loading = true;
 
-    this._usuarioService.buscarUsuarios( termino ).subscribe( (resp: Usuario[]) => {
-      this.usuarios = resp;
+    this._medicoService.buscarMedicos( termino ).subscribe( (resp: Medico[]) => {
+      this.medicos = resp;
       this.loading = false;
     });
   }
 
-  guardarUsuario( usuario: Usuario )
+  borrarMedico( medico: Medico )
   {
-    this._usuarioService.actualizarUsuario( usuario ).subscribe();
-  }
-
-  borrarUsuario( usuario: Usuario )
-  {
-    // IMPORTANTE: Un usuario no se puede borrar a sí mismo
-    if ( usuario._id === this._usuarioService.usuario._id )
-    {
-      Swal.fire({
-        icon: 'error',
-        title: 'Acción no permitida',
-        text: 'No se puede eliminar a sí mismo.'
-      });
-      return;
-    }
-
+   console.log(medico); 
     Swal.fire({
       title: '¿Esta seguro?',
       text: "¡Esta acción no podrá ser revertida!",
@@ -120,35 +101,32 @@ export class UsuariosComponent implements OnInit {
     }).then((result) => {
       if (result.value) {
 
-        // Eliminamos al usuario
-        this._usuarioService.eliminarUsuario( usuario._id ).subscribe( resp => {
-          // Antes de cargar los usuarios validemos un caso particular (se deja como tarea moral en el video 184),
-          // cuando se elimina al último usuario de la lista y además este es único en la página actual,
+        // Eliminamos el médico
+        this._medicoService.eliminarMedico( medico._id ).subscribe( resp => {
+          // Antes de cargar a los médicos validemos un caso particular (se deja como tarea moral en el video 184),
+          // cuando se elimina el último médico de la lista y además este es único en la página actual,
           // debería de regresarse a una página válida para que el usuario no vea una página vacía tras la
           // eliminación (paginación excedida):
           // Nota: (this.totalRegistros - 1) es menos 1 ya que totalRegistros se actualiza hasta que es llamado
-          //       el método cargarUsuarios(), pero nos adelantamos al saber que se ha restado un registro tras eliminar.
+          //       el método cargarMedicos(), pero nos adelantamos al saber que se ha restado un registro tras eliminar.
           if ( (this.totalRegistros - 1) <= this.desde )
           {
             this.desde -= this.limit;
           }
 
-          this.cargarUsuarios();
+          this.cargarMedicos();
           console.log(resp);
         } );
 
         Swal.fire(
-          '¡Usuario eliminado!',
-          usuario.email,
+          '¡Médico eliminado!',
+          medico.nombre,
           'success'
         )
       }
     })
   }
 
-  mostrarModal( id: string )
-  {
-    this._modalUploadService.mostrarModal( 'usuarios', id );
-  }
+
 
 }

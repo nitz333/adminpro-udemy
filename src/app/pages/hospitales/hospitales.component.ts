@@ -1,43 +1,68 @@
 import { Component, OnInit } from '@angular/core';
-import { UsuarioService } from 'src/app/services/services.index';
-import { Usuario } from 'src/app/models/usuario.model';
+import { HospitalService } from 'src/app/services/services.index';
+import { Hospital } from 'src/app/models/hospital.model';
 import Swal from 'sweetalert2';
 import { ModalUploadService } from 'src/app/components/modal-upload/modal-upload.service';
 
 @Component({
-  selector: 'app-usuarios',
-  templateUrl: './usuarios.component.html',
+  selector: 'app-hospitales',
+  templateUrl: './hospitales.component.html',
   styles: []
 })
-export class UsuariosComponent implements OnInit {
+export class HospitalesComponent implements OnInit {
 
-  usuarios: Usuario[] = [];
+  hospitales: Hospital[] = [];
   desde: number = 0;
   // Nota: A diferencia del video, establecí en el backend un valor limit como parámetro en el get,
   //       este servirá para definir la cantidad de registros por página
-  limit: number = 5;
+  limit: number = 2;
   totalRegistros: number = 0;
   loading: boolean = true;
 
-  constructor( private _usuarioService: UsuarioService,
+  constructor( private _hospitalService: HospitalService,
                private _modalUploadService: ModalUploadService ) { }
 
   ngOnInit()
   {
-    this.cargarUsuarios();
+    this.cargarHospitales();
 
     // Para el modal de carga de imagen, vamos a subscribirnos a éste servicio para ser notificados de cambios
-    this._modalUploadService.notificacion.subscribe( resp => this.cargarUsuarios() );
+    this._modalUploadService.notificacion.subscribe( resp => this.cargarHospitales() );
   }
 
-  cargarUsuarios()
+  cargarHospitales()
   {
     this.loading = true;
 
-    this._usuarioService.cargarUsuarios( this.desde, this.limit ).subscribe( (resp: any) => {
-      this.usuarios = resp.usuarios;
+    this._hospitalService.cargarHospitales( this.desde, this.limit ).subscribe( (resp: any) => {
+      this.hospitales = resp.hospitales;
       this.totalRegistros = resp.total;
       this.loading = false;
+    });
+  }
+
+  crearHospital()
+  {
+    Swal.fire({
+      icon: 'question',
+      title: 'Crear un nuevo hospital',
+      text: 'Ingrese el nombre del hospital',
+      input: 'text',
+      inputAttributes: {
+        required: 'true'
+      },
+      validationMessage: 'Debe asignar un nombre',
+      confirmButtonText: '<i class="fa fa-save"></i> Guardar',
+      confirmButtonAriaLabel: 'Guardar',
+      showCancelButton: true,
+      cancelButtonText: 'Cancelar'
+    }).then( result => {
+
+      this._hospitalService.crearHospital( result.value ).subscribe( () => {
+        this.cargarHospitales();
+        this._hospitalService._toastSwal(`Hospital "${ result.value }" ha sido creado.`, 'success');
+      });
+
     });
   }
 
@@ -52,14 +77,8 @@ export class UsuariosComponent implements OnInit {
 
     // Ese valor del limit es el que se usa aquí (lo anterior es para saber si suma o resta)
     let desde = this.desde + limit;
- 
-    
+     
     // Nota: A diferencia del video voy a considerar el valor limit que si considero en el backend:
-    // let paginaMaxima = Math.ceil( this.totalRegistros/this.limit );
-    // Nota: El (desde + 1) es porque en el backend la consulta el registro 0 es el primero al usarse un LIMIT
-    //if ( desde < 0 || ( (desde + 1) > this.totalRegistros || desde > (paginaMaxima * this.limit ) ) )
-    // Este codigo funciona bien pero fue más claro y corto el de Fernando:
-
     // Debemos validar que 'desde' no sea menor a 0 ni mayor a la cantidad de páginas permitidas totales.
     if ( desde < 0 || desde >= this.totalRegistros )
     {
@@ -68,46 +87,34 @@ export class UsuariosComponent implements OnInit {
     else
     {
       this.desde += limit;
-      this.cargarUsuarios();
+      this.cargarHospitales();
     }
-
   }
 
-  buscarUsuario( termino: string )
+  buscarHospital( termino: string )
   {
     // Validamos que el termino no sea vacío
     if ( termino.length <= 0 )
     {
-      this.cargarUsuarios();
+      this.cargarHospitales();
       return;
     }
 
     this.loading = true;
 
-    this._usuarioService.buscarUsuarios( termino ).subscribe( (resp: Usuario[]) => {
-      this.usuarios = resp;
+    this._hospitalService.buscarHospitales( termino ).subscribe( (resp: Hospital[]) => {
+      this.hospitales = resp;
       this.loading = false;
     });
   }
 
-  guardarUsuario( usuario: Usuario )
+  guardarHospital( hospital: Hospital )
   {
-    this._usuarioService.actualizarUsuario( usuario ).subscribe();
+    this._hospitalService.actualizarHospital( hospital ).subscribe();
   }
 
-  borrarUsuario( usuario: Usuario )
+  borrarHospital( hospital: Hospital )
   {
-    // IMPORTANTE: Un usuario no se puede borrar a sí mismo
-    if ( usuario._id === this._usuarioService.usuario._id )
-    {
-      Swal.fire({
-        icon: 'error',
-        title: 'Acción no permitida',
-        text: 'No se puede eliminar a sí mismo.'
-      });
-      return;
-    }
-
     Swal.fire({
       title: '¿Esta seguro?',
       text: "¡Esta acción no podrá ser revertida!",
@@ -120,26 +127,26 @@ export class UsuariosComponent implements OnInit {
     }).then((result) => {
       if (result.value) {
 
-        // Eliminamos al usuario
-        this._usuarioService.eliminarUsuario( usuario._id ).subscribe( resp => {
-          // Antes de cargar los usuarios validemos un caso particular (se deja como tarea moral en el video 184),
-          // cuando se elimina al último usuario de la lista y además este es único en la página actual,
+        // Eliminamos el hospital
+        this._hospitalService.eliminarHospital( hospital._id ).subscribe( resp => {
+          // Antes de cargar los hospitales validemos un caso particular (se deja como tarea moral en el video 184),
+          // cuando se elimina al último hospital de la lista y además este es único en la página actual,
           // debería de regresarse a una página válida para que el usuario no vea una página vacía tras la
           // eliminación (paginación excedida):
           // Nota: (this.totalRegistros - 1) es menos 1 ya que totalRegistros se actualiza hasta que es llamado
-          //       el método cargarUsuarios(), pero nos adelantamos al saber que se ha restado un registro tras eliminar.
+          //       el método cargarHospitales(), pero nos adelantamos al saber que se ha restado un registro tras eliminar.
           if ( (this.totalRegistros - 1) <= this.desde )
           {
             this.desde -= this.limit;
           }
 
-          this.cargarUsuarios();
+          this.cargarHospitales();
           console.log(resp);
         } );
 
         Swal.fire(
-          '¡Usuario eliminado!',
-          usuario.email,
+          '¡Hospital eliminado!',
+          hospital.nombre,
           'success'
         )
       }
@@ -148,7 +155,7 @@ export class UsuariosComponent implements OnInit {
 
   mostrarModal( id: string )
   {
-    this._modalUploadService.mostrarModal( 'usuarios', id );
+    this._modalUploadService.mostrarModal( 'hospitales', id );
   }
 
 }
