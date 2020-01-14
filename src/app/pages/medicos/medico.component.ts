@@ -60,7 +60,7 @@ export class MedicoComponent implements OnInit {
   cargarMedico( id: string )
   {
     this._medicoService.cargarMedico( id ).subscribe( (resp: any) => { 
-      console.log(resp);
+
       this.medico = resp;
 
       // Llenamos los valores del formulario

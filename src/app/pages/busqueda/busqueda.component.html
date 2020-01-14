@@ -1,0 +1,97 @@
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+
+                <h4 class="card-title">Usuarios</h4>
+                <hr>
+                <ul class="dropdown-user" style="list-style: none; margin:0; padding:0;" *ngIf="usuarios.length > 0; else noUsuarios">
+                    <li *ngFor="let usuario of usuarios">
+                        <div routerLink="/usuarios" class="dw-user-box cursor-pointer" align="center">
+                            <div class="u-img w70">
+                                <img [src]="usuario.img | imagen" class="w50 img-circle cursor-pointer">
+                            </div>
+                            <div class="u-text">
+                                <br>
+                                <h4>{{ usuario.nombre }} {{ usuario.primer_apellido }} {{ usuario.segundo_apellido }}</h4>
+                                <p class="text-muted">
+                                    {{ usuario.email }}
+                                </p>
+                            </div>
+                        </div>
+                        <hr role="separator" class="divider">
+                    </li>
+                </ul>
+
+                <ng-template #noUsuarios>
+                    <p>
+                        No hay registros
+                    </p>
+                </ng-template>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+
+                <h4 class="card-title">Hospitales</h4>
+                <hr>
+                <ul class="dropdown-user" style="list-style: none; margin:0; padding:0;" *ngIf="hospitales.length > 0; else noHospitales">
+                    <li *ngFor="let hospital of hospitales">
+                        <div routerLink="/hospitales" class="dw-user-box cursor-pointer" align="center">
+                            <div class="u-img w70">
+                                <img [src]="hospital.img | imagen: 'hospital'" class="w50 img-circle cursor-pointer">
+                            </div>
+                            <div class="u-text">
+                                <br>
+                                <h4>{{ hospital.nombre }}</h4>
+                            </div>
+                        </div>
+                        <hr role="separator" class="divider">
+                    </li>
+                </ul>
+                <ng-template #noHospitales>
+                    <p>
+                        No hay registros
+                    </p>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+
+                <h4 class="card-title">Médicos</h4>
+                <hr>
+                <ul class="dropdown-user" style="list-style: none; margin:0; padding:0;" *ngIf="medicos.length > 0; else noMedicos">
+                    <li *ngFor="let medico of medicos">
+                        <div [routerLink]="['/medico', medico._id]" class="dw-user-box cursor-pointer" align="center">
+                            <div class="u-img w70">
+                                <img [src]="medico.img | imagen: 'medico'" class="w50 img-circle cursor-pointer">
+                            </div>
+                            <div class="u-text">
+                                <br>
+                                <h4>{{ medico.nombre }}</h4>
+                                <p class="text-muted">
+                                    {{ medico.hospital['nombre'] }}
+                                </p>
+                            </div>
+                        </div>
+                        <hr role="separator" class="divider">
+                    </li>
+                </ul>
+                <ng-template #noMedicos>
+                    <p>
+                        No hay registros
+                    </p>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>

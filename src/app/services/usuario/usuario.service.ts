@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { Usuario } from 'src/app/models/usuario.model';
 import { URL_BACKEND } from '../../config/config';
 import Swal, { SweetAlertIcon } from 'sweetalert2';
 import { Router } from '@angular/router';
 import { UploadService } from '../upload/upload.service'; // Esta bien de esta ruta y no del services.index.ts por el error cíclico raro.
+import { throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,7 @@ export class UsuarioService {
   // Propiedades para saber si ya tenemos una sesión de usuario
   usuario: Usuario;
   token: string;
+  menu: any[] = [];
 
   constructor( private _http: HttpClient,
                private _router: Router,
@@ -41,13 +43,22 @@ export class UsuarioService {
     let url = URL_BACKEND + '/login';
     
     return this._http.post( url, usuario ).pipe( map( (resp: any) => {
-      
+
       // Guardaremos la información en el localStorage
-      this._guardarStorage( resp.id, resp.token, resp.usuario );
+      this._guardarStorage( resp.id, resp.token, resp.usuario, resp.menu );
 
       // Ya solo le diremos al usuario si se autentico en vez de pasarle datos que al fin ya obtuvimos e hicimos lo importante
       return true;
 
+    }),
+    catchError( err => {
+      //console.log(err.status);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en la autenticación',
+        text: err.error.mensaje
+      });
+      return throwError( err );
     })); 
   }
 
@@ -58,8 +69,9 @@ export class UsuarioService {
     // Nota: Es un post y nuestro backend requiere un objeto, por eso el token se envía como parte de un objeto.
     //       Y como en ES6 { atributo: atributo } es equivalente a { atributo }.
     return this._http.post( url, { token } ).pipe( map( (resp: any) => {
+      console.log('logoogle',resp);
       // Guardaremos la información en el localStorage
-      this._guardarStorage( resp.id, resp.token, resp.usuario );
+      this._guardarStorage( resp.id, resp.token, resp.usuario, resp.menu );
 
       // Ya solo le diremos al usuario si se autentico en vez de pasarle datos que al fin ya obtuvimos e hicimos lo importante
       return true;
@@ -70,12 +82,13 @@ export class UsuarioService {
   {
     this.usuario = null;
     this.token = '';
+    this.menu = [];
 
     // Nota: No usaremo clear ya que eso borra todo lo que tenga almacenado en el dominio y los ajustes del
     //       usuario es algo que me gustaría conservar aún tras un logout (por el momento ya que estos no viven en la BD).
     localStorage.removeItem('usuario');
     localStorage.removeItem('token');
-    localStorage.removeItem('id');
+    localStorage.removeItem('menu');
 
     this._router.navigate(['/login']);
   }
@@ -100,8 +113,16 @@ export class UsuarioService {
           text: usuario.email
         });
         return resp.usuario;
-      })
-    ); 
+      }),
+      catchError( err => {
+        //console.log(err.status);
+        Swal.fire({
+          icon: 'error',
+          title: err.error.mensaje,
+          text: err.error.errors.message
+        });
+        return throwError( err );
+      }));  
 
   }
 
@@ -123,14 +144,23 @@ export class UsuarioService {
       if ( usuario._id === this.usuario._id )
       {
         // Debemos actualizar nuestro local storage para reflejar los cambios de la BD
-        this._guardarStorage( resp.usuario._id, this.token, usuario );
+        this._guardarStorage( resp.usuario._id, this.token, usuario, this.menu );
       }
 
       // Mandamos una notificación de sweetalert2 pero estilo toast      
       this._toastSwal('Usuario actualizado', 'success');
 
       return true;
-    }));
+    }),
+    catchError( err => {
+      //console.log(err.status);
+      Swal.fire({
+        icon: 'error',
+        title: err.error.mensaje,
+        text: err.error.errors.message
+      });
+      return throwError( err );
+    })); 
   }
 
   eliminarUsuario( id: string )
@@ -148,7 +178,7 @@ export class UsuarioService {
       this.usuario.img = resp.usuario.img;
 
       // Debemos actualizar nuestro local storage para reflejar los cambios de la BD
-      this._guardarStorage( id, this.token, this.usuario );
+      this._guardarStorage( id, this.token, this.usuario, this.menu );
 
       // Mandamos una notificación de sweetalert2 pero estilo toast      
       this._toastSwal('Imagen actualizada', 'success');
@@ -164,16 +194,17 @@ export class UsuarioService {
     return ( this.token.length > 0 ) ? true : false;
   }
 
-  private _guardarStorage( id: string, token: string, usuario: Usuario )
+  private _guardarStorage( id: string, token: string, usuario: Usuario, menu: any )
   {
     localStorage.setItem('id', id);
     localStorage.setItem('token', token);
     localStorage.setItem('usuario', JSON.stringify(usuario));
+    localStorage.setItem('menu', JSON.stringify(menu));
 
     // Nota: la propiedad del id no la vamos a usar mucho
     this.usuario = usuario;
     this.token = token;
-
+    this.menu = menu;
   }
 
   private _cargarStorage()
@@ -182,11 +213,13 @@ export class UsuarioService {
     {
       this.token = localStorage.getItem('token');
       this.usuario = JSON.parse( localStorage.getItem('usuario') );
+      this.menu = JSON.parse( localStorage.getItem('menu') );
     }
     else
     {
       this.token = '';
       this.usuario = null;
+      this.menu = [];
     }
   }
 

@@ -6,9 +6,11 @@ declare function init_plugins();
 @Component({
   selector: 'app-error404',
   templateUrl: './error404.component.html',
-  styles: []
+  styleUrls: ['../../../assets/css/pages/error-pages.css']
 })
 export class Error404Component implements OnInit {
+
+  year: number = new Date().getFullYear();
 
   constructor() { }
 
