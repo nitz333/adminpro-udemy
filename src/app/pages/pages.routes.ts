@@ -9,7 +9,7 @@ import { AccountSettingsComponent } from './account-settings/account-settings.co
 import { PromesasComponent } from './promesas/promesas.component';
 import { RxjsComponent } from './rxjs/rxjs.component';
 
-import { LoginGuard, AdminGuard } from '../services/services.index';
+import { LoginGuard, AdminGuard, TokenGuard } from '../services/services.index';
 import { UsuariosComponent } from './usuarios/usuarios.component';
 import { HospitalesComponent } from './hospitales/hospitales.component';
 import { MedicosComponent } from './medicos/medicos.component';
@@ -18,12 +18,12 @@ import { BusquedaComponent } from './busqueda/busqueda.component';
 
 
 const routes: Routes = [
-    { 
-        path: '', 
-        component: PagesComponent,
-        canActivate: [ LoginGuard ],
-        children: [
-          { path: 'dashboard', component: DashboardComponent, data: { titulo: 'Dashboard' } },
+          {
+            path: 'dashboard',
+            component: DashboardComponent,
+            canActivate: [ TokenGuard ], // Este guard puede ponerse en todas aquellas páginas que requieran de validar el token previamente. Para este proyecto solo lo dejaremos cada que se navegue al dashboard.
+            data: { titulo: 'Dashboard' }
+          },
           { path: 'progress', component: ProgressComponent, data: { titulo: 'Progress' } },
           { path: 'grafica1', component: Graficas1Component, data: { titulo: 'Gráficas' } },
           { path: 'promesas', component: PromesasComponent, data: { titulo: 'Promesas' } },
@@ -43,8 +43,6 @@ const routes: Routes = [
           { path: 'medico/:id', component: MedicoComponent, data: { titulo: 'Actualizar médico' } },
           
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' }, // Cualquier ruta vacía redirecciona al dashboard
-        ]
-      }
 ];
 
 export const PAGES_ROUTES = RouterModule.forChild( routes );

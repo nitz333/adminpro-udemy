@@ -8,6 +8,7 @@ import { HeaderComponent } from './header/header.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { Error404Component } from './error404/error404.component';
+import { ModalUploadComponent } from '../components/modal-upload/modal-upload.component';
 
 
 @NgModule({
@@ -15,6 +16,7 @@ import { Error404Component } from './error404/error404.component';
         HeaderComponent,
         SidebarComponent,
         BreadcrumbsComponent,
+        ModalUploadComponent,
         Error404Component
     ],
     imports: [
@@ -26,6 +28,7 @@ import { Error404Component } from './error404/error404.component';
         HeaderComponent,
         SidebarComponent,
         BreadcrumbsComponent,
+        ModalUploadComponent,
         Error404Component
     ]
 })

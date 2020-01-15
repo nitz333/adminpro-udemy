@@ -14,6 +14,7 @@ import { throwError } from 'rxjs';
 export class UsuarioService {
 
   // Propiedades para saber si ya tenemos una sesión de usuario
+  id: string; // En nuestra app este id realemnte no es tan importante
   usuario: Usuario;
   token: string;
   menu: any[] = [];
@@ -24,6 +25,33 @@ export class UsuarioService {
   {
     this._cargarStorage();
     //console.log(this.usuario);
+  }
+
+  renuevaToken()
+  {
+    let url = URL_BACKEND + '/login/renuevatoken';
+    url += '?token=' + this.token;
+
+    return this._http.get( url ).pipe( map( (resp: any) => {
+
+      this.token = resp.token;
+
+      // Guardaremos la información en el localStorage
+      // Nota: No es necesario renovar el token de la BD, ya que nuestra app usa el del local storage
+      this._guardarStorage( this.id, resp.token, this.usuario, this.menu );
+      //console.log("Token renovado!");
+      return true;
+    }),
+    catchError( err => {
+      //console.log(err.status);
+      this._router.navigate(['/login']);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en la autenticación',
+        text: "No fue posible renovar el token"
+      });
+      return throwError( err );
+    }));
   }
 
   login( usuario: Usuario, recordar: boolean = false )
@@ -69,7 +97,7 @@ export class UsuarioService {
     // Nota: Es un post y nuestro backend requiere un objeto, por eso el token se envía como parte de un objeto.
     //       Y como en ES6 { atributo: atributo } es equivalente a { atributo }.
     return this._http.post( url, { token } ).pipe( map( (resp: any) => {
-      console.log('logoogle',resp);
+      //console.log('logoogle',resp);
       // Guardaremos la información en el localStorage
       this._guardarStorage( resp.id, resp.token, resp.usuario, resp.menu );
 
@@ -80,12 +108,14 @@ export class UsuarioService {
 
   logout()
   {
+    this.id = '';
     this.usuario = null;
     this.token = '';
     this.menu = [];
 
     // Nota: No usaremo clear ya que eso borra todo lo que tenga almacenado en el dominio y los ajustes del
     //       usuario es algo que me gustaría conservar aún tras un logout (por el momento ya que estos no viven en la BD).
+    localStorage.removeItem('id');
     localStorage.removeItem('usuario');
     localStorage.removeItem('token');
     localStorage.removeItem('menu');

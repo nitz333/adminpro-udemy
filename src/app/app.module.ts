@@ -1,11 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // Rutas raíces
 import { APP_ROUTES } from './app.routes';
-
-// Mis módulos
-import { PagesModule } from './pages/pages.module';
 
 // Mis servicios
 import { ServicesModule } from './services/services.module';
@@ -14,9 +12,10 @@ import { ServicesModule } from './services/services.module';
 import { AppComponent } from './app.component';
 import { RegisterComponent } from './login/register.component';
 import { LoginComponent } from './login/login.component';
+import { PagesComponent } from './pages/pages.component';
 
-// temporales, se van a rehubicar más tarde:
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+// Mis módulos
+import { SharedModule } from './shared/shared.module';
 
 
 
@@ -24,15 +23,17 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   declarations: [
     AppComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    PagesComponent
   ],
   imports: [
     BrowserModule,
     APP_ROUTES,
-    PagesModule,
+    //PagesModule, // Como se cargará dinámicamente con loadChildren (lazyload) ya no se importa aquí para que no haya colición.
     FormsModule,
     ReactiveFormsModule,
-    ServicesModule
+    ServicesModule,
+    SharedModule
   ],
   providers: [],
   bootstrap: [AppComponent]
